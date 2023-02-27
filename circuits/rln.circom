@@ -3,39 +3,6 @@ pragma circom 2.1.0;
 include "./incrementalMerkleTree.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 
-template CalculateIdentityCommitment() {
-    signal input identity_secret;
-    signal output out;
-
-    component hasher = Poseidon(1);
-    hasher.inputs[0] <== identity_secret;
-
-    out <== hasher.out;
-}
-
-template CalculateA1() {
-    signal input a_0;
-    signal input external_nullifier;
-
-    signal output out;
-
-    component hasher = Poseidon(2);
-    hasher.inputs[0] <== a_0;
-    hasher.inputs[1] <== external_nullifier;
-
-    out <== hasher.out;
-}
-
-template CalculateInternalNullifier() {
-    signal input a_1;
-    signal output out;
-
-    component hasher = Poseidon(1);
-    hasher.inputs[0] <== a_1;
-
-    out <== hasher.out;
-}
-
 template RLN(depth) {
     // Private signals
     signal input identity_secret;
