@@ -7,7 +7,7 @@ Rate Limit Nullifier implemented in Circom.
 ## Running
 
 ```sh
-./scripts/build-circuits.sh <rln|nrln>
+./scripts/build-circuits.sh <rln>
 ```
 
 ## Benchmarks
@@ -61,14 +61,14 @@ Each member _knows_ a linear polynomial for any `epoch` and app (`rln_identifier
 ```
 A(x) = (a_0, a_1)
 
-external_nullifier = (epoch, rln_identifier)
-a_1 = h(a_0, external_nullifier)
+external_nullifier = H(epoch, rln_identifier)
+a_1 = H(a_0, external_nullifier)
 ```
 
 Each member has a secret line equation for an epoch
 
 ```
-y = a_0 + x a_1
+y = a_0 + x * a_1
 ```
 
 Along with a signal members should publicly provide a `(x, y)` share such that satisfies the line equation.
@@ -104,13 +104,13 @@ These are constraints of RLN circuit.
 #### Public Inputs
 
 * `x`
-* `epoch`
-* `rln_identifier`
+* `external_nullifier`
 
 #### Private Inputs
 
 * `a_0` (`identity_secret`, secret/private key)
-* `witness` (`path_elements` and `identity_path_index`, elements from the witness component) 
+* `path_elements` 
+* `identity_path_index`
 
 #### Outputs
 
@@ -130,47 +130,19 @@ Therefore, a member who spams goes under a risk to be slashed that is burn of th
 
 We can also dismember the related public key from membership tree.
 
-
-## Extra: The arbitrary polynomial degree (spam threshold) usecase
-
-Other than the single signal per epoch usecase, we've implemented circuits that allow for (pseudo) arbitrary signals per epoch. To enable this we use polynomials of arbitrary degree, depending on the  spam threshold requirement for the certain usecase. 
-For this implementation the user secret is represented as an array of random finite field values (instead of a single finite field value). 
-
-Let's say this array is denoted by: `rln_secret[n]`
-
-The polynomial is now represented as:
-
-```
-y_n = a_0 + x*a_1 + x^2*a_2 + x^3*a_3 + ... + x^n*a_n 
-```
-
-where `a_0 = hash(rln_secret[0], rln_secret[1],..., rln_secret[limit - 1])`,
-
-each `a_i`, when `i > 0 && i <= n` = `a_i = hash(rln_secret[i-1] * epoch)` 
-
-The user will need to send more than `n` signals per epoch to be eligible for slashing.
-
-The internal nullifier is calculated as:
-
-```
-nullifier = hash(a_1, a_2, ... a_n, rln_identifier)
-```
-
 ## Implementation
 
-
 RLN circuits for the base case - polynomial with degree 1, can be found at [github.com/appliedzkp/rln](https://github.com/appliedzkp/rln)
-RLN circuits for the general case - polynomial with arbitrary degree, can be found at: [github.com/appliedzkp/rln/tree/nrln](https://github.com/appliedzkp/rln/tree/nrln)
 Library providing API for the RLN construct, written in JavaScript can be found here:  [github.com/appliedzkp/libsemaphore](https://github.com/appliedzkp/libsemaphore).
 
 A tutorial on how to use the library provided above, and implement a simple chat protocol (completely offchain): [github.com/bdim1/rln-anonymous-chat-app](https://github.com/bdim1/rln-anonymous-chat-app) 
 
-The circuits are implemented in [Circom 2.0](https://github.com/iden3/circom).
+The circuits are implemented in [Circom 2.1.0](https://github.com/iden3/circom).
 
 ### Poseidon Hasher
 
 Canonical poseidon implementation is used, as implemented in the [circomlib library](https://github.com/iden3/circomlib), according to the [Poseidon paper](https://eprint.iacr.org/2019/458.pdf). Hashes are generated for 1 and 2 inputs only, so the `width (t)` parameter of the hasher is either 2 or 3.
 
-### Merkle Tree implementation
+<!-- ### Merkle Tree implementation
 
-IncrementalQuinTree structure is used for the Membership tree. The circuits are reused from [this repository](https://github.com/appliedzkp/incrementalquintree). You can find out more details about the IncrementalQuinTree algorithm [here](https://arxiv.org/pdf/2105.06009v1.pdf).
+IncrementalQuinTree structure is used for the Membership tree. The circuits are reused from [this repository](https://github.com/appliedzkp/incrementalquintree). You can find out more details about the IncrementalQuinTree algorithm [here](https://arxiv.org/pdf/2105.06009v1.pdf). -->

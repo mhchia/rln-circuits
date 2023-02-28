@@ -20,8 +20,6 @@ fi
 circuit_path=""
 if [ "$1" = "rln" ]; then
     circuit_path="../circuits/rln.circom"
-elif [ "$1" = "nrln" ]; then
-    circuit_path="../circuits/nrln.circom"
 else
     circuit_path="../circuits/rln.circom"
     echo "Unrecognized argument, using 'rln' as default."
