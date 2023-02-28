@@ -3,15 +3,15 @@ pragma circom 2.1.0;
 include "./incrementalMerkleTree.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 
-template RLN(depth) {
+template RLN(DEPTH) {
     // Private signals
-    signal input identity_secret;
-    signal input path_elements[depth];
-    signal input identity_path_index[depth];
+    signal input identitySecret;
+    signal input pathElements[DEPTH];
+    signal input identityPathIndex[DEPTH];
 
     // Public signals
     signal input x;
-    signal input external_nullifier;
+    signal input externalNullifier;
 
     // Outputs
     signal output y;
@@ -19,19 +19,19 @@ template RLN(depth) {
     signal output nullifier;
 
     // Identity commitment calculation
-    signal identity_commitment <== Poseidon(1)([identity_secret]);
+    signal identityCommitment <== Poseidon(1)([identitySecret]);
 
     // Merkle tree inclusion proof // Outputs the root
-    root <== MerkleTreeInclusionProof(depth)(identity_commitment, identity_path_index, path_elements);
+    root <== MerkleTreeInclusionProof(DEPTH)(identityCommitment, identityPathIndex, pathElements);
 
     // Linear equation constraints:
-    // a_1 = Poseidon(identity_secret, external_nullifier)
-    // y = a_0 + a_1 * x
-    // internal_nullifier = Poseidon(a_1)
-    signal a_1 <== Poseidon(2)([identity_secret, external_nullifier]);
-    y <== identity_secret + a_1 * x;
+    // a1 = Poseidon(identitySecret, externalNullifier)
+    // y = a0 + a1 * x
+    // nullifier = Poseidon(a_1)
+    signal a1 <== Poseidon(2)([identitySecret, externalNullifier]);
+    y <== identitySecret + a1 * x;
 
-    nullifier <== Poseidon(1)([a_1]);
+    nullifier <== Poseidon(1)([a1]);
 }
 
-component main { public [x, external_nullifier] } = RLN(20);
+component main { public [x, externalNullifier] } = RLN(20);
