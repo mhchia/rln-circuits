@@ -12,16 +12,18 @@ template MerkleTreeInclusionProof(DEPTH) {
 
     signal mux[DEPTH][2];
     signal levelHashes[DEPTH + 1];
-    
+
     levelHashes[0] <== leaf;
     for (var i = 0; i < DEPTH; i++) {
+        // Check that pathIndex is either 0 or 1
         pathIndex[i] * (pathIndex[i] - 1) === 0;
 
+        // If pathIndex[i] is 0, mux[i] = (levelHashes[i], pathElements[i]), else mux[i] = (pathElements[i], levelHashes[i])
         mux[i] <== MultiMux1(2)(
             [
-                [levelHashes[i], pathElements[i]], 
+                [levelHashes[i], pathElements[i]],
                 [pathElements[i], levelHashes[i]]
-            ], 
+            ],
             pathIndex[i]
         );
 
