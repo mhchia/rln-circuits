@@ -4,7 +4,7 @@
   "description": "Rate-Limiting Nullifier implemented in circom",
   "scripts": {
     "build": "bash scripts/build-circuits.sh rln",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require ts-node/register --config ./tsconfig.json 'test/**/*.test.ts'"
   },
   "repository": {
     "type": "git",
@@ -21,11 +21,15 @@
     "circomlib": "^2.0.5"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
+    "@types/node": "^18.14.6",
     "@zk-kit/incremental-merkle-tree": "^1.0.0",
     "chai": "^4.3.7",
     "circom_tester": "^0.0.19",
     "mocha": "^10.2.0",
-    "poseidon-lite": "^0.0.2"
+    "poseidon-lite": "^0.0.2",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.9.5"
   }
 }

@@ -1,34 +1,30 @@
-// import * as path from "path";
-// import { wasm as wasm_tester } from "circom_tester";
-// import {
-//     IncrementalMerkleTree,
-// } from '@zk-kit/incremental-merkle-tree'
-// import poseidon from 'poseidon-lite'
-
-const chai = require("chai");
+import chai from "chai";
 const assert = chai.assert;
-const path = require("path");
+import * as path from "path";
 const tester = require("circom_tester").wasm;
-const incrementalMerkleTree = require("@zk-kit/incremental-merkle-tree");
-const poseidon = require("poseidon-lite");
+import { IncrementalMerkleTree } from "@zk-kit/incremental-merkle-tree";
+import poseidon from "poseidon-lite";
 const ffjavascript = require("ffjavascript");
 
-const F = new ffjavascript.ZqField(BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617"));
+
+// ffjavascript has no types so leave circuit with untyped
+type CircuitT = any;
+
+const SNARK_FIELD_SIZE = BigInt('21888242871839275222246405745257275088548364400416034343698204186575808495617')
+const F = new ffjavascript.ZqField(SNARK_FIELD_SIZE);
 
 const circuitPath = path.join(__dirname, "..", "circuits", "rln.circom");
-
 
 // MERKLE TREE
 const MERKLE_TREE_DEPTH = 20;
 const MERKLE_TREE_ZERO_VALUE = BigInt(0);
 
-
 function genFieldElement() {
     return F.random()
 }
 
-function genMerkleProof(elements, leafIndex) {
-    const tree = new incrementalMerkleTree.IncrementalMerkleTree(poseidon, MERKLE_TREE_DEPTH, MERKLE_TREE_ZERO_VALUE, 2);
+function genMerkleProof(elements: BigInt[], leafIndex: number) {
+    const tree = new IncrementalMerkleTree(poseidon, MERKLE_TREE_DEPTH, MERKLE_TREE_ZERO_VALUE, 2);
     for (let i = 0; i < elements.length; i++) {
         tree.insert(elements[i]);
     }
@@ -37,13 +33,12 @@ function genMerkleProof(elements, leafIndex) {
     return merkleProof
 }
 
-
 describe("Check Merkle tree Circuit", function () {
-    let circuit;
+    let circuit: CircuitT;
 
     this.timeout(10000000);
 
-    before( async function () {
+    before(async function () {
         circuit = await tester(circuitPath);
     });
 
@@ -72,10 +67,10 @@ describe("Check Merkle tree Circuit", function () {
         const nullifier = poseidon([a1]);
 
         // Test: should generate proof if inputs are correct
-        const witness = await circuit.calculateWitness(inputs, true);
+        const witness: bigint[] = await circuit.calculateWitness(inputs, true);
         await circuit.checkConstraints(witness);
 
-        async function getSignal(witness, name) {
+        async function getSignal(witness: bigint[], name: string) {
             const prefix = "main"
             // E.g. the full name of the signal "root" is "main.root"
             // You can look up the signal names using `circuit.getDecoratedOutput(witness))`
